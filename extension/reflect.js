@@ -96,8 +96,13 @@ function extractStandaloneSearchInputs(html) {
   return out;
 }
 
+// A loopback address can only ever be the tester's own machine - there's no third party it could
+// belong to - so these are always allowed and don't need to be added to the list by hand.
+const ALWAYS_LOCAL = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
+
 export function isAllowlisted(hostname, list) {
   const h = (hostname || "").toLowerCase();
+  if (ALWAYS_LOCAL.has(h) || h.endsWith(".localhost")) return true;
   return (list || []).some((d) => {
     const entry = String(d || "").trim().toLowerCase().replace(/^\*\./, "");
     return entry && (h === entry || h.endsWith(`.${entry}`));
@@ -207,6 +212,20 @@ async function appendLog(entries) {
 export async function getLog() {
   const { [LOG_KEY]: log = [] } = await chrome.storage.local.get(LOG_KEY);
   return log;
+}
+
+// Read-only view of rate-limit usage per domain, for showing in the UI. Does not consume a slot.
+export async function getRateStatus() {
+  const { [RATE_KEY]: all = {} } = await chrome.storage.local.get(RATE_KEY);
+  const now = Date.now();
+  const out = [];
+  for (const [domain, hits] of Object.entries(all)) {
+    const active = (hits || []).filter((t) => now - t < 3600_000);
+    if (!active.length) continue;
+    const resetMs = Math.max(0, 3600_000 - (now - Math.min(...active)));
+    out.push({ domain, used: active.length, max: MAX_RUNS_PER_DOMAIN_PER_HOUR, resetMinutes: Math.ceil(resetMs / 60000) });
+  }
+  return out;
 }
 
 const CATEGORY_FIX = {

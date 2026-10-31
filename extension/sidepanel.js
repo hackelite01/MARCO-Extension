@@ -1,6 +1,7 @@
 import { runTool, MOVES_FOCUS } from "./tools.js";
 import { DEFAULT_PREFS, loadPrefs, savePrefs } from "./prefs.js";
 import { loadBaselines, removeBaseline, fetchSnapshot, compareSnapshot } from "./deface.js";
+import { getRateStatus } from "./reflect.js";
 
 const $ = (id) => document.getElementById(id);
 const log = $("log");
@@ -411,7 +412,24 @@ async function paintWatchlist() {
     box.appendChild(row);
   }
 }
-$("settings").addEventListener("toggle", () => { if ($("settings").open) paintWatchlist(); });
+async function paintRateLimit() {
+  const box = $("ratelimit");
+  const status = await getRateStatus();
+  if (!status.length) {
+    box.innerHTML = '<p class="empty">No reflection checks run in the last hour.</p>';
+    return;
+  }
+  box.replaceChildren();
+  for (const s of status) {
+    const row = document.createElement("div");
+    row.className = "watchitem";
+    const full = s.used >= s.max;
+    row.innerHTML = `<span class="wtitle" title="${esc(s.domain)}">${esc(s.domain)}</span>
+      <span class="wsev${full ? " high" : ""}">${s.used}/${s.max} used this hour${full ? ` - resets in ~${s.resetMinutes}m` : ""}</span>`;
+    box.appendChild(row);
+  }
+}
+$("settings").addEventListener("toggle", () => { if ($("settings").open) { paintWatchlist(); paintRateLimit(); } });
 
 // ---------- wiring ----------
 $("send").onclick = () => { send($("text").value); $("text").value = ""; };
@@ -448,6 +466,7 @@ $("clear").onclick = () => {
   prefs = await loadPrefs();
   paintPrefs();
   paintWatchlist();
+  paintRateLimit();
   speechSynthesis.getVoices();
   await followActive();
   connect();

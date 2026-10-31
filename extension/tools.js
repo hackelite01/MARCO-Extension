@@ -47,7 +47,7 @@ function readPage(offset) {
   const uniq = (a) => [...new Set(a.filter(Boolean))];
   const root = document.querySelector("main,article,[role=main]") || document.body;
   const text = (root.innerText || "").replace(/\n{3,}/g, "\n\n").trim();
-  const LIMIT = 8000;
+  const LIMIT = 4000; // smaller chunk = faster Gemma responses
   return {
     meta: document.querySelector('meta[name="description"],meta[property="og:description"]')?.content || "",
     headings: [...document.querySelectorAll("h1,h2,h3")]

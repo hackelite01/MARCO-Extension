@@ -11,7 +11,7 @@ from .gemma import Gemma
 
 MAX_STEPS = 8
 MAX_HISTORY = 16
-MAX_RESULT_CHARS = 9000
+MAX_RESULT_CHARS = 4000  # less text per turn = faster Gemma responses
 
 TOOLS = {
     "get_page_text": 'Read this tab: title, meta description, heading outline, your selected text and the main content. Long pages are cut off; pass {"offset": N} to continue. args: {"offset": number (optional)}',

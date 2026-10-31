@@ -75,10 +75,11 @@
 
       <fieldset>
         <legend>Reflected-input (XSS recon) testing</legend>
-        <p class="hint warn"><strong>Authorised testing only.</strong> Add a domain here only if you own it, or have the owner's explicit written permission to test it. Nothing is ever tested unless its domain is listed below. Tests use harmless marker text only - no scripts are ever sent - and you're asked to confirm every time before anything is sent, with an extra check for government/education/bank/healthcare-looking domains.</p>
+        <p class="hint warn"><strong>Authorised testing only.</strong> <code>localhost</code>/<code>127.0.0.1</code> are always allowed (they can only ever be your own machine). Any other domain must be added below, and only if you own it or have the owner's explicit written permission. Tests use harmless marker text only - no scripts are ever sent - and you're asked to confirm every time before anything is sent, with an extra check for government/education/bank/healthcare-looking domains.</p>
         <label>Allowlisted domains (one per line, e.g. <code>example.com</code> also covers <code>app.example.com</code>)
           <textarea id="reflectAllowlist" rows="3" placeholder="example.com"></textarea>
         </label>
+        <div id="ratelimit" class="watchlist"></div>
       </fieldset>
       <button id="resetprefs" type="button">Reset to defaults</button>
     </details>

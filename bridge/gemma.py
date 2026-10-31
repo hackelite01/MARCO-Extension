@@ -67,7 +67,7 @@ class Gemma:
             out.append(types.Content(role=m["role"], parts=parts))
         return out
 
-    async def chat(self, system, messages, temperature=0.4, max_tokens=900, on_retry=None):
+    async def chat(self, system, messages, temperature=0.4, max_tokens=500, on_retry=None):
         async def call():
             fold = self._system_in_prompt
             cfg = types.GenerateContentConfig(
