@@ -326,7 +326,7 @@ export async function runReflectionCheck(tab, prefs, ask) {
   }
   if (!isAllowlisted(target.hostname, allowlist)) {
     return {
-      text: `${NOTICE}\n\n${target.hostname} is not on the allowlist, so nothing was sent to it. Add it in Settings under "Reflected-input (XSS recon) testing" first - only the site owner (or someone with their explicit permission) should add a domain there.`,
+      text: `${NOTICE}\n\n${target.hostname} is not authorised for testing. Nothing was sent to it.`,
     };
   }
   if (looksSensitive(target.hostname)) {
