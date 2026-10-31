@@ -1,12 +1,46 @@
-# Marco: a voice-and-vision browser assistant built on Gemma 4
+<div align="center">
 
-**Repo:** https://github.com/hackelite01/MARCO-Extension
+<img src="extension/icon128.png" width="84" alt="Marco icon">
+
+# Marco
+### A voice-and-vision browser assistant, built on Gemma 4
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![Powered by Gemma 4](https://img.shields.io/badge/Powered%20by-Gemma%204-ff7a1a?style=for-the-badge)](https://ai.google.dev/gemma)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Manifest V3](https://img.shields.io/badge/Chrome%2FEdge-Extension%20MV3-4285F4?style=for-the-badge)](extension/manifest.json)
+[![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2026-blueviolet?style=for-the-badge)](https://hacktoberfest.com)
+
+**[Features](#what-it-can-do)** · **[Setup](#setup)** · **[Safe demo targets](#try-it-against-something-safe-to-test)** · **[Security model](#security-and-privacy)** · **[Architecture](#architecture)**
+
+[![Repo](https://img.shields.io/badge/GitHub-hackelite01%2FMARCO--Extension-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/hackelite01/MARCO-Extension)
+[![Star this repo](https://img.shields.io/badge/⭐-Star%20this%20repo-f1c40f?style=for-the-badge)](https://github.com/hackelite01/MARCO-Extension)
+[![Report a bug](https://img.shields.io/badge/🐛-Report%20a%20bug-e74c3c?style=for-the-badge)](https://github.com/hackelite01/MARCO-Extension/issues)
+
+</div>
 
 > **Powered by Gemma 4.** Every reply, tool decision and fix suggestion in this project comes from Google's open-weights **Gemma 4** (`gemma-4-26b-a4b-it` by default, `gemma-4-31b-it` optional), called through the Gemini API. It does not use any Gemini model.
 
 Talk to your browser in **English, Hindi or Hinglish**. Marco reads the page you are on, summarises it, looks at your screen, manages tabs, fills forms, and can run a **passive security check on a site and write the fixes for you**.
 
 Built for the Hacktoberfest Hack Day Ahmedabad x Open Source Weekend (Best Use of Gemma 4, Best Open-Source AI Project).
+
+---
+
+### Contents
+
+- [What it can do](#what-it-can-do)
+- [Defacement monitoring](#defacement-monitoring)
+- [Reflected-input (XSS recon) testing](#reflected-input-xss-recon-testing)
+- [Answers you can verify](#answers-you-can-verify)
+- [One agent per tab](#one-agent-per-tab)
+- [Architecture](#architecture)
+- [Setup](#setup)
+- [Settings and permissions](#settings-and-permissions)
+- [Security and privacy](#security-and-privacy)
+- [Limitations](#limitations) · [Roadmap](#roadmap) · [Credits](#credits) · [License](#license)
+
+---
 
 ## What it can do
 
