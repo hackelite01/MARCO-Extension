@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Marco - Voice Assistant (Gemma 4)",
+  "version": "0.1.0",
+  "description": "Talk to your browser in English, Hindi or Hinglish. Powered by Gemma 4 through a local bridge.",
+  "permissions": ["sidePanel", "tabs", "activeTab", "scripting", "cookies", "storage", "alarms", "notifications"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "action": { "default_title": "Open Marco", "default_icon": "icon48.png" },
+  "icons": { "16": "icon16.png", "48": "icon48.png", "128": "icon128.png" }
+}

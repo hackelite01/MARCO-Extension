@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marco</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span id="dot" class="dot"></span><strong>Marco</strong><small id="model">offline</small></div>
+    <details id="settings">
+      <summary>Settings</summary>
+      <label>Bridge token <input id="token" type="password" placeholder="BRIDGE_TOKEN from .env"></label>
+      <label>Port <input id="port" type="number" value="8765"></label>
+      <button id="save" type="button">Save &amp; reconnect</button>
+
+      <fieldset>
+        <legend>Voice</legend>
+        <label>Speech language
+          <select id="lang">
+            <option value="en-IN">English (India)</option>
+            <option value="hi-IN">Hindi / Hinglish</option>
+            <option value="gu-IN">Gujarati</option>
+            <option value="en-US">English (US)</option>
+          </select>
+        </label>
+        <label>Speak replies
+          <select id="speak">
+            <option value="voice">Only when I ask by voice</option>
+            <option value="always">Always</option>
+            <option value="never">Never (text only)</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Don't ask me before Marco can&hellip;</legend>
+        <label class="check"><input type="checkbox" data-auto="navigate"> load a page in the current tab</label>
+        <label class="check"><input type="checkbox" data-auto="open_url"> open a new tab</label>
+        <label class="check"><input type="checkbox" data-auto="switch_tab"> switch to another tab</label>
+        <label class="check"><input type="checkbox" data-auto="click_text"> click buttons and links</label>
+        <label class="check"><input type="checkbox" data-auto="fill_field"> type into fields (never passwords)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Tools Marco may use</legend>
+        <p class="hint">Reading the page, searching it and listing tabs are always on.</p>
+        <label class="check"><input type="checkbox" data-tool="navigate"> load pages in the current tab</label>
+        <label class="check"><input type="checkbox" data-tool="open_url"> open new tabs</label>
+        <label class="check"><input type="checkbox" data-tool="switch_tab"> switch tabs</label>
+        <label class="check"><input type="checkbox" data-tool="click_text"> click</label>
+        <label class="check"><input type="checkbox" data-tool="fill_field"> type into fields</label>
+        <label class="check"><input type="checkbox" data-tool="point_at"> point at things on the page (&ldquo;show me&rdquo;)</label>
+        <label class="check"><input type="checkbox" data-tool="screenshot"> screenshots (sent to Gemma 4)</label>
+        <label class="check"><input type="checkbox" data-tool="security_scan"> passive security scan</label>
+        <label class="check"><input type="checkbox" data-tool="watch_page,check_defacement"> defacement monitoring</label>
+        <label class="check"><input type="checkbox" data-tool="check_reflection"> reflected-input (XSS recon) testing</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Defacement monitoring</legend>
+        <p class="hint">Say &ldquo;watch this page&rdquo; to save a baseline, then &ldquo;has this site been defaced?&rdquo; any time to check it. Checks run read-only against sites you add yourself.</p>
+        <label>Auto-check watched pages every
+          <select id="defaceMinutes">
+            <option value="0">Off (check only when I ask)</option>
+            <option value="5">5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+          </select>
+        </label>
+        <div id="watchlist" class="watchlist"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Reflected-input (XSS recon) testing</legend>
+        <p class="hint warn"><strong>Authorised testing only.</strong> Add a domain here only if you own it, or have the owner's explicit written permission to test it. Nothing is ever tested unless its domain is listed below. Tests use harmless marker text only - no scripts are ever sent - and you're asked to confirm every time before anything is sent, with an extra check for government/education/bank/healthcare-looking domains.</p>
+        <label>Allowlisted domains (one per line, e.g. <code>example.com</code> also covers <code>app.example.com</code>)
+          <textarea id="reflectAllowlist" rows="3" placeholder="example.com"></textarea>
+        </label>
+      </fieldset>
+      <button id="resetprefs" type="button">Reset to defaults</button>
+    </details>
+  </header>
+
+  <nav class="agents">
+    <div id="chips" class="chips" role="tablist" aria-label="Tab agents"></div>
+    <div class="agentbar">
+      <span id="agentname" class="agentname"></span>
+      <button id="follow" type="button" title="Switch agents automatically with the active tab">Follow tab</button>
+      <button id="clear" type="button" title="Forget this agent's conversation">New chat</button>
+    </div>
+  </nav>
+
+  <main id="log" aria-live="polite"></main>
+
+  <p id="notice" class="notice" hidden></p>
+
+  <footer>
+    <div class="row">
+      <button id="mic" type="button" title="Push to talk">&#127908;</button>
+      <input id="text" type="text" placeholder="Ask this tab's agent anything" autocomplete="off">
+      <button id="send" type="button">Send</button>
+    </div>
+    <label class="hf"><input id="handsfree" type="checkbox"> Hands-free: say &ldquo;Hey Marco&rdquo;</label>
+    <p class="hint">Each tab has its own agent and memory. Security scans are passive and only for sites you own or are authorised to test.</p>
+  </footer>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

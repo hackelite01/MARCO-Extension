@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Marco microphone access</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 420px; margin: 15vh auto; padding: 0 16px; background: #0f1115; color: #e8eaf0; }
+    button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 0; background: #ff7a1a; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Allow Marco to use the microphone</h2>
+  <p>Chrome asks for microphone access once per extension. Click the button, choose Allow, then close this tab and press the mic in the side panel again.</p>
+  <button id="go" type="button">Enable microphone</button>
+  <p id="out"></p>
+  <script src="mic.js"></script>
+</body>
+</html>
