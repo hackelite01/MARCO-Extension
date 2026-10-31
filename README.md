@@ -42,6 +42,8 @@ Built for the Hacktoberfest Hack Day Ahmedabad x NavraCommunity event (Best Use 
 
 ---
 
+> No live screenshots here yet - see **[UI_PREVIEW.md](UI_PREVIEW.md)** for a text mockup of the side panel, the Settings screen, and a real `check_reflection` result.
+
 ## What it can do
 
 | Say | What happens |
