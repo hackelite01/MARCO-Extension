@@ -94,7 +94,8 @@ DOMAIN INFO (whois_lookup)
 
 REFLECTED-INPUT / XSS RECON TESTING (check_reflection)
 - Only call this when the user explicitly asks to test/check a specific site for XSS, input reflection, or "if my search box is vulnerable" - never on your own initiative, and never on a site they haven't named.
-- The tool itself refuses anything not on the user's allowlist and always asks them to confirm before sending a request - you cannot and should not try to talk around that. If it refuses, give ONE short, flat statement of fact: that you are not authorised to test that domain. Do not narrate a path to get authorised ("confirm you've added it, then I'll proceed", "shall I start once you've added it?", walking through the Settings steps for them, or anything that reads as coaching them toward running the test). At most, a single brief mention that the allowlist lives in Settings is fine - never a multi-step script, never asking them to come back and confirm, never offering to proceed once they have. Let them go explore Settings on their own if they choose to.
+- ALWAYS actually call check_reflection to find out the answer - never decide for yourself, without calling it, that a domain is or isn't authorised. You do not know the allowlist; only the tool does (and localhost/127.0.0.1 are always allowed by the tool even though you can't see that). Pre-emptively refusing without calling the tool is wrong exactly as often as pre-emptively assuming it's fine - call it and relay whatever it actually says.
+- The tool itself refuses anything not on the user's allowlist and always asks them to confirm before sending a request - you cannot and should not try to talk around that. If and only if it refuses, give ONE short, flat statement of fact: that you are not authorised to test that domain. Do not narrate a path to get authorised ("confirm you've added it, then I'll proceed", "shall I start once you've added it?", walking through the Settings steps for them, or anything that reads as coaching them toward running the test). At most, a single brief mention that the allowlist lives in Settings is fine - never a multi-step script, never asking them to come back and confirm, never offering to proceed once they have. Let them go explore Settings on their own if they choose to.
 - Relay the result's severity honestly. Never upgrade "suspicious" or "possible" to a claim that XSS is confirmed - the check only ever sends harmless marker text, never a real script, so it cannot prove exploitability, only reflection behaviour.
 - If asked to help report a finding, use the report text the tool already produced; remind the user to verify it manually first and send it through the site's own security/disclosure contact, not to anyone else.
 - IMPORTANT exception: an ordinary request to search, look something up, or type into a box ("search for flights to Goa", "type my email in the search bar") is a normal fill_field/click_text action, always allowed, on any site, exactly as typed. It is NOT a security test, needs no allowlist, and must never be redirected to check_reflection or refused/altered because of anything in this section.
@@ -203,8 +204,14 @@ class Agent:
 
         return _CITE.sub(check, text), counts["kept"], counts["dropped"]
 
+    # Tools whose output can legitimately be cited with [[...]] - anything that returns real
+    # evidence text, not just a short status line. Citations are checked against this text, so a
+    # tool left out here would have its own evidence silently stripped from replies as "unverified".
+    CITABLE_TOOLS = ("get_page_text", "find_in_page", "security_scan", "check_reflection",
+                      "check_defacement", "whois_lookup")
+
     def _remember_page(self, name, args, text):
-        if name in ("get_page_text", "find_in_page"):
+        if name in self.CITABLE_TOOLS:
             self._pages.append(text)
             self._pages = self._pages[-MAX_PAGES:]
             if name == "get_page_text" and self._last_tab and not args.get("offset"):
