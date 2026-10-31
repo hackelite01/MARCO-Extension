@@ -2,6 +2,7 @@ import { runTool, MOVES_FOCUS } from "./tools.js";
 import { DEFAULT_PREFS, loadPrefs, savePrefs } from "./prefs.js";
 import { loadBaselines, removeBaseline, fetchSnapshot, compareSnapshot } from "./deface.js";
 import { getRateStatus, isHardDenied } from "./reflect.js";
+import { loadHistoryList, saveHistoryEntry, removeHistoryEntry, groupByHost } from "./history.js";
 
 const $ = (id) => document.getElementById(id);
 const log = $("log");
@@ -30,7 +31,7 @@ function ensureSession(tab) {
   if (!sid) {
     sid = String(tab.id);
     if (sessions.has(sid)) sid = `${tab.id}-${Date.now()}`; // that id already belongs to a session that moved tabs
-    sessions.set(sid, { tabId: tab.id, title: "", url: "", log: [], busy: false, unread: false, lastVia: "text" });
+    sessions.set(sid, { tabId: tab.id, title: "", url: "", log: [], busy: false, unread: false, lastVia: "text", historyId: null });
   }
   const s = sessions.get(sid);
   s.title = tab.title || s.title || "New tab";
@@ -39,6 +40,7 @@ function ensureSession(tab) {
 }
 
 function selectSession(sid) {
+  if (historyOpen) setHistoryOpen(false);
   current = sid;
   const s = sessions.get(sid);
   s.unread = false;
@@ -152,7 +154,86 @@ function addMsg(sid, kind, text) {
   if (s.log.length > 60) s.log.shift();
   if (sid === current) paintMsg(kind, text);
   else { s.unread = true; renderChips(); }
+  if (kind === "user" || kind === "bot") persistHistory(sid);
 }
+
+// ---------- persistent chat history (survives closing the tab or reloading the panel) ----------
+// Saves the DISPLAYED transcript only - it does not restore Gemma's own memory of the conversation,
+// which lives in the bridge process. A history entry's id outlives the live tab session's id.
+const historySaveTimers = new Map();
+function persistHistory(sid) {
+  const s = sessions.get(sid);
+  if (!s || !s.log.length) return;
+  if (!s.historyId) s.historyId = crypto.randomUUID();
+  clearTimeout(historySaveTimers.get(sid));
+  historySaveTimers.set(sid, setTimeout(() => {
+    saveHistoryEntry(s.historyId, { title: s.title, url: s.url, log: s.log });
+  }, 500));
+}
+
+// ---------- history panel (browse + view past chats, grouped by site) ----------
+let historyOpen = false;
+
+function setHistoryOpen(open) {
+  historyOpen = open;
+  $("historyPanel").hidden = !open;
+  log.hidden = open;
+  $("historyBtn").classList.toggle("on", open);
+  if (open) renderHistoryList();
+}
+
+async function renderHistoryList() {
+  const panel = $("historyPanel");
+  const entries = await loadHistoryList();
+  if (!entries.length) {
+    panel.innerHTML = '<p class="hempty">No past chats saved yet. History is saved automatically as you talk to Marco on each tab.</p>';
+    return;
+  }
+  const groups = groupByHost(entries);
+  panel.replaceChildren();
+  for (const [host, items] of groups) {
+    const group = document.createElement("div");
+    group.className = "hgroup";
+    const h = document.createElement("h4");
+    h.textContent = host;
+    group.appendChild(h);
+    for (const e of items) {
+      const row = document.createElement("div");
+      row.className = "historyitem";
+      const when = new Date(e.updatedAt).toLocaleString();
+      row.innerHTML = `<span class="htitle" title="${esc(e.url)}">${esc(short(e.title || e.url, 30))}</span>
+        <span class="htime">${esc(when)}</span>
+        <button type="button" data-view>View</button>
+        <button type="button" data-del>Delete</button>`;
+      row.querySelector("[data-view]").onclick = () => renderHistoryTranscript(e);
+      row.querySelector("[data-del]").onclick = async () => { await removeHistoryEntry(e.id); renderHistoryList(); };
+      group.appendChild(row);
+    }
+    panel.appendChild(group);
+  }
+}
+
+function renderHistoryTranscript(entry) {
+  const panel = $("historyPanel");
+  panel.replaceChildren();
+  const bar = document.createElement("div");
+  bar.className = "htranscript-bar";
+  bar.innerHTML = `<span class="hinfo" title="${esc(entry.url)}">${esc(entry.title || entry.url)} &middot; read-only, Marco won't remember this conversation</span>
+    <button type="button" data-resume>Resume on a live tab</button>
+    <button type="button" data-back>Back</button>`;
+  bar.querySelector("[data-back]").onclick = () => renderHistoryList();
+  bar.querySelector("[data-resume]").onclick = () => { chrome.tabs.create({ url: entry.url }); setHistoryOpen(false); };
+  panel.appendChild(bar);
+  for (const m of entry.log) {
+    const el = document.createElement("div");
+    el.className = `msg ${m.kind}`;
+    if (m.kind === "bot") el.innerHTML = render(m.text);
+    else el.textContent = m.text;
+    panel.appendChild(el);
+  }
+}
+
+$("historyBtn").onclick = () => setHistoryOpen(!historyOpen);
 
 function notice(html) {
   $("notice").innerHTML = html;
@@ -460,6 +541,7 @@ $("clear").onclick = () => {
   const s = sessions.get(current);
   if (!s) return;
   s.log = [];
+  s.historyId = null; // a genuinely new conversation, not a silent overwrite of the old history entry
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "reset", session: current }));
   selectSession(current);
 };

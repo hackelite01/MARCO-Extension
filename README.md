@@ -92,6 +92,7 @@ Every browser tab gets its **own Marco agent with its own memory**, so a GitHub 
 - Each agent sees its tab's title and URL, so it follows you as you navigate within the tab.
 - "New chat" resets one agent without touching the others. Closing a tab drops its agent.
 - Agents can consult each other: the bridge keeps a map of which tabs have an agent, and `ask_tab` lets one agent put a question to another (one level deep, so agents cannot chain endlessly).
+- **Past chats are saved and browsable.** Click **History** to see every past conversation grouped by site, open one to view the transcript, and click **Resume on a live tab** to continue on that URL. This persists the *displayed* conversation across closing a tab or reloading the panel - it does not restore Gemma's own memory of that conversation, which lives in the bridge process and resets with it; resuming starts a fresh agent on that page, not a continuation of the old one.
 
 Replies are written for two channels: a short natural spoken line (read aloud) and, when useful, a longer markdown analysis in the chat. The agent adapts its analysis to the page: articles (main claim, key points, what's missing), code and docs (structure, what to use first, risks), pricing (concrete comparison), errors (likely cause, next step).
 
