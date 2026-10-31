@@ -1,4 +1,6 @@
-# Marco Bridge: a voice assistant for your browser, built on Gemma 4
+# Marco: a voice-and-vision browser assistant built on Gemma 4
+
+**Repo:** https://github.com/hackelite01/MARCO-Extension
 
 > **Powered by Gemma 4.** Every reply, tool decision and fix suggestion in this project comes from Google's open-weights **Gemma 4** (`gemma-4-26b-a4b-it` by default, `gemma-4-31b-it` optional), called through the Gemini API. It does not use any Gemini model.
 
@@ -66,8 +68,10 @@ Replies are written for two channels: a short natural spoken line (read aloud) a
         ^                    |
         |   {"tool": ...}    |
         +---- tool calls <---+     tools run inside the extension:
-                                   get_page_text, screenshot, list_tabs, switch_tab,
-                                   open_url, click_text, fill_field, security_scan
+                                   get_page_text, find_in_page, screenshot, navigate, open_url,
+                                   click_text, fill_field, point_at, highlight_quote, list_tabs,
+                                   switch_tab, ask_tab, security_scan, watch_page,
+                                   check_defacement, check_reflection
 ```
 
 Gemma is prompted to answer with either plain text or one JSON tool call (a native `function_call` part is normalised to the same shape). The bridge runs that loop (at most 6 steps) and the extension executes tools in the browser. Gemma 4's hidden "thinking" is set to `MINIMAL` to keep replies fast (`GEMMA_THINKING=default` turns that off). Questions about "this page" are answered after the bridge reads the page itself, which saves one model round trip.
@@ -79,7 +83,7 @@ The shared Gemma endpoint can fail often when busy, so the client is built for i
 Requirements: Python 3.10+, Chrome 114+ (side panel API), a Google AI Studio key.
 
 ```bash
-git clone <this repo> && cd marco-bridge
+git clone https://github.com/hackelite01/MARCO-Extension.git && cd MARCO-Extension
 python -m venv venv && venv\Scripts\activate     # macOS/Linux: source venv/bin/activate
 pip install -r requirements.txt
 
@@ -91,12 +95,22 @@ python -m bridge.server                           # start the bridge
 
 Load the extension:
 
-1. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, choose the `extension/` folder.
+1. Open `chrome://extensions` (or `edge://extensions` in Microsoft Edge - both are Chromium and support this), enable **Developer mode**, click **Load unpacked**, choose the `extension/` folder.
 2. Click the Marco icon to open the side panel.
 3. In **Settings**, paste the `BRIDGE_TOKEN` from your `.env` and press **Save and reconnect**. The dot turns green and shows the model name.
 4. Press the mic (push to talk) or tick **Hands-free** and say "Hey Marco ...". If Chrome blocks the mic, use the **Grant access** link once.
 
 Optional end-to-end check without Chrome: with the bridge running, `python scripts/e2e_test.py`.
+
+### Try it against something safe to test
+
+`scripts/demo_vuln_site.py` spins up three tiny local sites (`localhost:8090` ShopNow, `:8091` QuickForum, `:8092` LoginPortal), each with a different look and a different reflected-input scenario (unescaped, safely escaped, and inside a `<script>` block) - all three classification outcomes `check_reflection` can produce, on sites you fully own and run yourself:
+
+```bash
+python scripts/demo_vuln_site.py
+```
+
+`localhost` and `127.0.0.1` are always allowed for reflection testing (see **Security and privacy** below) - no allowlist setup needed.
 
 ## Settings and permissions
 
@@ -107,11 +121,12 @@ Everything below is in the side panel's **Settings** and applies immediately.
 | Speak replies | only after a spoken request / always / never | only after a spoken request |
 | Don't ask before: load a page in this tab, open a new tab, switch tabs | on / off each | on |
 | Don't ask before: click buttons and links, type into fields | on / off each | off (asks first) |
-| Tools Marco may use: navigate, new tabs, switch tabs, click, type, screenshots, security scan, defacement monitoring | on / off each | all on |
+| Tools Marco may use: navigate, new tabs, switch tabs, click, type, point at things, screenshots, security scan, defacement monitoring, reflection testing | on / off each | all on |
 | Speech language | English (India), Hindi/Hinglish, Gujarati, English (US) | English (India) |
 | Auto-check watched pages (defacement monitoring) | off / 5 / 15 / 30 / 60 minutes | 15 minutes |
+| Reflected-input (XSS recon) allowlist | any domains you add; `localhost`/`127.0.0.1` always included | empty |
 
-A tool that is switched off is refused, and Marco tells you which setting to turn on. Reading the page, searching it and listing tabs are always available.
+A tool that is switched off is refused, and Marco tells you which setting to turn on. Reading the page, searching it and listing tabs are always available. Settings also shows a live **rate-limit readout** (checks used per domain this hour) and the **defacement watchlist**, so the safety limits aren't just a claim - you can see them.
 
 When Marco opens a page for you ("open GitHub and find the trending repo"), the conversation moves with it into that tab, so the thread is never lost.
 
@@ -130,6 +145,7 @@ When Marco opens a page for you ("open GitHub and find the trending repo"), the 
   - **Links:** query parameters that look like an open-redirect target (`?next=`, `?return=`, ...) pointing off-site
   - **Exposed files:** first checks whether the site returns 200 for a made-up path (common on single-page apps, which would make this check unreliable) and skips the file checks if so
   Every finding is explained with where it came from and a concrete fix. This is a quick triage a developer could do by hand, automated — not a full assessment, and it can miss things or occasionally flag something that turns out to be fine. **Use it only on sites you own or are authorised to test.**
+- `check_reflection` adds the same passive philosophy to reflected-input testing, with its own allowlist (`localhost`/`127.0.0.1` always included, since a loopback address can only ever be your own machine; any other domain must be added by hand), a confirmation on every run, a second confirmation for government/education/bank/healthcare-looking hostnames, a per-domain rate limit, and a hard rule that no script or executable payload is ever sent — only an inert marker and four bare characters (`"'<>`) used purely to observe how the response encodes them.
 - Defacement monitoring is also passive: a plain `fetch` of pages you explicitly added, nothing else. The `alarms` permission runs that check on a timer and `notifications` shows the result; neither permission lets the extension do anything beyond that.
 - The extension requests `<all_urls>` host access so it can read any page you ask about and fetch its response headers. Page text and screenshots you ask about are sent to the Gemini API to be processed by Gemma 4.
 - Speech recognition and speech synthesis use Chrome's built-in Web Speech API, so audio may be processed by Chrome's speech service.
