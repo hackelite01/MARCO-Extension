@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marco — Voice &amp; Cyber Browser Assistant, built on Gemma 4</title>
+<meta name="description" content="Marco reads your browser tabs aloud, shows you where to click, verifies its own answers with on-page citations, and runs passive cybersecurity checks — all powered by Google's Gemma 4.">
+<link rel="icon" href="icon128.png">
+<style>
+  :root { --bg:#0b0d12; --panel:#161920; --panel2:#1d212b; --text:#eef0f4; --muted:#9aa3b5; --accent:#ff7a1a; --accent2:#ffb02e; --border:#262b36; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,"Segoe UI",system-ui,sans-serif; }
+  a { color:var(--accent); }
+  .wrap { max-width:960px; margin:0 auto; padding:0 24px; }
+  header.hero { text-align:center; padding:72px 24px 56px; }
+  header.hero img { width:84px; border-radius:20px; box-shadow:0 10px 40px rgba(255,122,26,.25); }
+  h1 { font-size:40px; margin:20px 0 8px; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tagline { color:var(--muted); font-size:18px; max-width:560px; margin:0 auto 28px; }
+  .cta { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-block; padding:12px 22px; border-radius:10px; font-weight:600; text-decoration:none; }
+  .btn.primary { background:var(--accent); color:#fff; }
+  .btn.ghost { border:1px solid var(--border); color:var(--text); }
+  .badges { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+  .badge { font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
+  section { padding:48px 24px; }
+  h2 { font-size:26px; margin-bottom:24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .card h3 { margin:0 0 8px; font-size:16px; color:var(--accent); }
+  .card p { margin:0; color:var(--muted); font-size:14px; }
+  .steps { background:var(--panel2); border-radius:14px; padding:24px 28px; }
+  .steps ol { margin:0; padding-left:20px; color:var(--muted); }
+  .steps li { margin:8px 0; }
+  .steps code { background:var(--bg); padding:2px 6px; border-radius:6px; color:var(--text); font-size:13px; }
+  footer { text-align:center; padding:40px 24px 60px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); margin-top:24px; }
+  footer a { color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img src="icon128.png" alt="Marco icon">
+  <h1>Marco</h1>
+  <p class="tagline">A voice-and-vision browser assistant, built on Google's open-weights <strong>Gemma 4</strong>. Reads your tabs, shows you where to click, verifies its own answers, and runs passive cybersecurity checks.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/hackelite01/MARCO-Extension">View on GitHub</a>
+    <a class="btn ghost" href="https://github.com/hackelite01/MARCO-Extension#setup">Install guide</a>
+  </div>
+  <div class="badges">
+    <span class="badge">Powered by Gemma 4</span>
+    <span class="badge">Chrome / Edge, Manifest V3</span>
+    <span class="badge">MIT licensed</span>
+    <span class="badge">Hacktoberfest 2026</span>
+  </div>
+</header>
+
+<section class="wrap">
+  <h2>What it does</h2>
+  <div class="grid">
+    <div class="card"><h3>One agent per tab</h3><p>Every tab gets its own Gemma 4 agent with its own memory, so your GitHub repo, docs and dashboard never get mixed up. Agents can even ask each other questions.</p></div>
+    <div class="card"><h3>Show me</h3><p>Ask "how do I sign up?" and Marco scrolls to the right button and draws a glowing ring on it — not just a text answer.</p></div>
+    <div class="card"><h3>Answers you can verify</h3><p>Facts come with citation pins. Click one and the exact sentence it came from is highlighted on the page. Unverifiable citations are silently dropped.</p></div>
+    <div class="card"><h3>Security scan</h3><p>Passive checks for missing headers, exposed files, outdated libraries, weak tokens and open redirects — each with a concrete fix.</p></div>
+    <div class="card"><h3>Defacement monitoring</h3><p>Save a baseline of a page, then ask anytime "has this been hacked?" A background sweep can also check on its own and notify you.</p></div>
+    <div class="card"><h3>Reflected-input testing</h3><p>Checks whether a site's search box or query parameters reflect input unsafely — using a harmless marker, never a real script — gated behind an allowlist and a confirmation every time.</p></div>
+    <div class="card"><h3>WHOIS / domain info</h3><p>Who registered a domain and when, straight from public RDAP and DNS records — no connection to the site itself.</p></div>
+    <div class="card"><h3>Hindi, English, Hinglish, Gujarati</h3><p>Speaks naturally in the language you use, and only out loud when you actually asked by voice.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Try it in under 2 minutes</h2>
+  <div class="steps">
+    <ol>
+      <li>Clone the repo: <code>git clone https://github.com/hackelite01/MARCO-Extension.git</code></li>
+      <li>Follow the <a href="https://github.com/hackelite01/MARCO-Extension#setup">Setup</a> section of the README: install the Python bridge, add your Gemini API key, start the bridge.</li>
+      <li>Load the <code>extension/</code> folder as an unpacked extension at <code>chrome://extensions</code> or <code>edge://extensions</code>.</li>
+      <li>Open the side panel, connect, and start talking.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <p>Built for Hacktoberfest Hack Day Ahmedabad x NavraCommunity, organized by <strong>NavraCommunity</strong> and <strong>MLH</strong>.</p>
+  <p>Gemma 4 by Google. MIT licensed. <a href="https://github.com/hackelite01/MARCO-Extension">Source on GitHub</a>.</p>
+</footer>
+
+</body>
+</html>

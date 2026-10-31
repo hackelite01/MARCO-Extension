@@ -1,0 +1,10 @@
+name: marco-landing
+static_sites:
+  - name: marco-site
+    github:
+      repo: hackelite01/MARCO-Extension
+      branch: main
+      deploy_on_push: true
+    source_dir: site
+    index_document: index.html
+    error_document: index.html
