@@ -23,7 +23,7 @@
 
 Talk to your browser in **English, Hindi or Hinglish**. Marco reads the page you are on, summarises it, looks at your screen, manages tabs, fills forms, and can run a **passive security check on a site and write the fixes for you**.
 
-Built for the Hacktoberfest Hack Day Ahmedabad x Open Source Weekend (Best Use of Gemma 4, Best Open-Source AI Project).
+Built for the Hacktoberfest Hack Day Ahmedabad x NavraCommunity event (Best Use of Gemma 4, Best Open-Source AI Project). Thanks to **NavraCommunity** for organizing the event and the Hack Day space this project was built at.
 
 ---
 
@@ -54,6 +54,7 @@ Built for the Hacktoberfest Hack Day Ahmedabad x Open Source Weekend (Best Use o
 | "Check my docs tab: does it support pagination?" | **Cross-tab:** this tab's agent asks the other tab's agent, which reads its own page |
 | "Click Sign in" / "type my name in the Name field" | Page actions, each one asks for your confirmation first unless you turn that off |
 | "Watch this page" / "Has this site been defaced?" | **Defacement monitoring** (see below) |
+| "Who owns this domain?" / "when was it registered?" | Public registry (RDAP/WHOIS) and DNS lookup - registrar, dates, name servers, resolved IPs |
 
 ## Defacement monitoring
 
@@ -105,7 +106,7 @@ Replies are written for two channels: a short natural spoken line (read aloud) a
                                    get_page_text, find_in_page, screenshot, navigate, open_url,
                                    click_text, fill_field, point_at, highlight_quote, list_tabs,
                                    switch_tab, ask_tab, security_scan, watch_page,
-                                   check_defacement, check_reflection
+                                   check_defacement, check_reflection, whois_lookup
 ```
 
 Gemma is prompted to answer with either plain text or one JSON tool call (a native `function_call` part is normalised to the same shape). The bridge runs that loop (at most 6 steps) and the extension executes tools in the browser. Gemma 4's hidden "thinking" is set to `MINIMAL` to keep replies fast (`GEMMA_THINKING=default` turns that off). Questions about "this page" are answered after the bridge reads the page itself, which saves one model round trip.
@@ -180,6 +181,7 @@ When Marco opens a page for you ("open GitHub and find the trending repo"), the 
   - **Exposed files:** first checks whether the site returns 200 for a made-up path (common on single-page apps, which would make this check unreliable) and skips the file checks if so
   Every finding is explained with where it came from and a concrete fix. This is a quick triage a developer could do by hand, automated — not a full assessment, and it can miss things or occasionally flag something that turns out to be fine. **Use it only on sites you own or are authorised to test.**
 - `check_reflection` adds the same passive philosophy to reflected-input testing, with its own allowlist (`localhost`/`127.0.0.1` always included, since a loopback address can only ever be your own machine; any other domain must be added by hand), a confirmation on every run, a second confirmation for government/education/bank/healthcare-looking hostnames, a per-domain rate limit, and a hard rule that no script or executable payload is ever sent — only an inert marker and four bare characters (`"'<>`) used purely to observe how the response encodes them.
+- `whois_lookup` queries public RDAP (modern WHOIS) and DNS infrastructure only - it never connects to the site itself, so it needs no allowlist or confirmation. **Port scanning was deliberately left out**: it's active probing of a host's ports rather than reading public information, browsers have no raw-socket API to do it safely anyway, and a JS-side approximation of it is the same technique used to scan a visitor's local network from a malicious page - a different risk class from everything else here.
 - Defacement monitoring is also passive: a plain `fetch` of pages you explicitly added, nothing else. The `alarms` permission runs that check on a timer and `notifications` shows the result; neither permission lets the extension do anything beyond that.
 - The extension requests `<all_urls>` host access so it can read any page you ask about and fetch its response headers. Page text and screenshots you ask about are sent to the Gemini API to be processed by Gemma 4.
 - Speech recognition and speech synthesis use Chrome's built-in Web Speech API, so audio may be processed by Chrome's speech service.
@@ -201,6 +203,8 @@ When Marco opens a page for you ("open GitHub and find the trending repo"), the 
 ## Credits
 
 Gemma 4 by Google. Inspired by the idea of on-device browser agents such as `nico-martin/gemma4-browser-extension` (no code copied). This project grew out of the author's own personal voice assistant.
+
+Thanks to **NavraCommunity** and **MLH (Major League Hacking)** for organizing Hacktoberfest Hack Day Ahmedabad, the event this project was built for.
 
 ## License
 

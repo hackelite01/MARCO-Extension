@@ -8,6 +8,7 @@ import json
 import re
 
 from .gemma import Gemma
+from .osint import lookup_domain
 
 MAX_STEPS = 8
 MAX_HISTORY = 16
@@ -30,6 +31,7 @@ TOOLS = {
     "watch_page": "Save a baseline snapshot (title + page text) of this tab's site for defacement monitoring. Call when the user asks to watch/monitor this site, or to accept a change as the new normal. args: {}",
     "check_defacement": "Compare this tab's site right now to its saved watch_page baseline and report whether it looks defaced or significantly changed (with severity and why). If no baseline exists yet, saves one instead of comparing. Never modifies the baseline itself. Call when the user asks if a site has been hacked/defaced/changed. args: {}",
     "check_reflection": "Passive reflected-input (XSS recon) check on this tab: tests each query parameter already in the URL AND any GET search/input form visible on the page (so a search box can be tested even before it's been used) with a harmless random marker (never a script or payload), and reports whether it comes back unescaped, escaped, or inside a <script> block, with remediation guidance and a draft disclosure report. ONLY works if this domain is on the user's allowlist in Settings, and ALWAYS asks the user to confirm before sending anything (this cannot be pre-approved). Call only when the user explicitly asks to test/check this site for XSS or input reflection issues. args: {}",
+    "whois_lookup": 'Public domain registry (RDAP/WHOIS) and DNS info for a domain: registrar, registration/expiry dates, name servers, and the IPs it resolves to. Only queries public registries and DNS - never connects to the site itself, so no allowlist or confirmation is needed. Use when the user asks who owns/runs a site, when it was registered, or similar. args: {"domain": string (bare domain, e.g. "example.com")}',
 }
 
 # Questions about "the page" are answered after reading it, so we read it up front and save a model round trip.
@@ -85,6 +87,10 @@ DEFACEMENT MONITORING (watch_page / check_defacement)
 - "Has this been hacked/defaced/changed?" / "is my site okay?" -> check_defacement. Lead with the severity in plain words (none/low = reassure them; medium = worth a look; high = say it looks like it may have been defaced and what changed). Never claim certainty - this is a heuristic check, not proof.
 - A background sweep also runs on its own (set in Settings) and raises a desktop notification; you don't need to poll for that yourself.
 - This only ever watches sites the user adds themselves; never suggest watching, scanning or acting on a site the user hasn't named.
+
+DOMAIN INFO (whois_lookup)
+- "Who owns this site?" / "when was this registered?" / "who runs example.com?" -> whois_lookup with the bare domain (strip https:// and any path). This is public registry/DNS data only, so no allowlist or confirmation is needed, unlike the other security tools.
+- Never use this as a stand-in for check_reflection or security_scan - it tells you who registered a domain, not whether the site itself is safe.
 
 REFLECTED-INPUT / XSS RECON TESTING (check_reflection)
 - Only call this when the user explicitly asks to test/check a specific site for XSS, input reflection, or "if my search box is vulnerable" - never on your own initiative, and never on a site they haven't named.
@@ -209,6 +215,9 @@ class Agent:
             if self.consulting or not self.consult:
                 return {"text": "ask_tab is not available here."}
             return await self.consult(str(args.get("tab", "")), str(args.get("question", "")))
+        if name == "whois_lookup":
+            # Runs here in the bridge (public registry/DNS only) - no browser round trip needed.
+            return {"text": await lookup_domain(str(args.get("domain", "")))}
         return await self.call_tool(name, args)
 
     def _trim(self):
