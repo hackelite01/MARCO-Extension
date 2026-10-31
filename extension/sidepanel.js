@@ -1,7 +1,7 @@
 import { runTool, MOVES_FOCUS } from "./tools.js";
 import { DEFAULT_PREFS, loadPrefs, savePrefs } from "./prefs.js";
 import { loadBaselines, removeBaseline, fetchSnapshot, compareSnapshot } from "./deface.js";
-import { getRateStatus } from "./reflect.js";
+import { getRateStatus, isHardDenied } from "./reflect.js";
 
 const $ = (id) => document.getElementById(id);
 const log = $("log");
@@ -372,8 +372,12 @@ document.querySelectorAll("[data-tool]").forEach((el) => {
 $("speak").onchange = (e) => { prefs.speak = e.target.value; savePrefs(prefs); };
 $("defaceMinutes").onchange = (e) => { prefs.defaceMinutes = Number(e.target.value); savePrefs(prefs); };
 $("reflectAllowlist").onchange = (e) => {
-  prefs.reflectAllowlist = e.target.value.split("\n").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const entered = e.target.value.split("\n").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const denied = entered.filter(isHardDenied);
+  prefs.reflectAllowlist = entered.filter((d) => !isHardDenied(d));
+  e.target.value = prefs.reflectAllowlist.join("\n"); // reflect what was actually saved, not what was typed
   savePrefs(prefs);
+  if (denied.length) notice(`${denied.join(", ")} ${denied.length > 1 ? "are" : "is"} .gov/.mil and can't be added - these are refused outright, not gated behind a confirmation.`);
 };
 $("resetprefs").onclick = () => { prefs = structuredClone(DEFAULT_PREFS); savePrefs(prefs); paintPrefs(); paintWatchlist(); };
 

@@ -100,8 +100,18 @@ function extractStandaloneSearchInputs(html) {
 // belong to - so these are always allowed and don't need to be added to the list by hand.
 const ALWAYS_LOCAL = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
+// Unlike bank/healthcare/education (where a small clinic, a personal fintech project, or a
+// university researcher could plausibly own a real domain), a .gov/.mil domain is realistically
+// never something an individual hackathon user owns. These are hard-denied - not just a second
+// confirmation - and the Settings UI refuses to even save one into the allowlist (see sidepanel.js).
+export function isHardDenied(hostname) {
+  const h = (hostname || "").toLowerCase();
+  return /\.gov$|\.gov\.[a-z]{2,}$|\.mil$|\.mil\.[a-z]{2,}$/.test(h);
+}
+
 export function isAllowlisted(hostname, list) {
   const h = (hostname || "").toLowerCase();
+  if (isHardDenied(h)) return false;
   if (ALWAYS_LOCAL.has(h) || h.endsWith(".localhost")) return true;
   return (list || []).some((d) => {
     const entry = String(d || "").trim().toLowerCase().replace(/^\*\./, "");
@@ -309,6 +319,11 @@ export async function runReflectionCheck(tab, prefs, ask) {
   const target = new URL(tab.url);
   const allowlist = prefs.reflectAllowlist || [];
 
+  if (isHardDenied(target.hostname)) {
+    return {
+      text: `${NOTICE}\n\n${target.hostname} is a .gov/.mil domain. This is refused outright, not just gated behind a confirmation - these are never something an individual user owns, so there is no "add it to the allowlist" path for this category at all.`,
+    };
+  }
   if (!isAllowlisted(target.hostname, allowlist)) {
     return {
       text: `${NOTICE}\n\n${target.hostname} is not on the allowlist, so nothing was sent to it. Add it in Settings under "Reflected-input (XSS recon) testing" first - only the site owner (or someone with their explicit permission) should add a domain there.`,
