@@ -5,6 +5,7 @@
 # Marco
 ### A voice-and-vision browser assistant, built on Gemma 4
 
+[![Winner: Best Use of Gemma 4](https://img.shields.io/badge/🏆%20Winner-Best%20Use%20of%20Gemma%204-ffd700?style=for-the-badge)](https://www.mlh.com/events/hacktoberfest-hack-day-ahmedabad-x-navracommunity/submissions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![Powered by Gemma 4](https://img.shields.io/badge/Powered%20by-Gemma%204-ff7a1a?style=for-the-badge)](https://ai.google.dev/gemma)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -23,7 +24,7 @@
 
 Talk to your browser in **English, Hindi or Hinglish**. Marco reads the page you are on, summarises it, looks at your screen, manages tabs, fills forms, and can run a **passive security check on a site and write the fixes for you**.
 
-Built for the Hacktoberfest Hack Day Ahmedabad x NavraCommunity event (Best Use of Gemma 4, Best Open-Source AI Project). Thanks to **NavraCommunity** for organizing the event and the Hack Day space this project was built at.
+🏆 **Winner, Best Use of Gemma 4** at Hacktoberfest Hack Day Ahmedabad x NavraCommunity. Thanks to **NavraCommunity** and **MLH** for organizing the event and the Hack Day space this project was built at.
 
 ---
 
